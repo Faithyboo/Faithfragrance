@@ -318,12 +318,12 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                 key={product.id}
                 className="bg-surface-container-lowest rounded-2xl border border-outline-variant/30 shadow-xs overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow group"
               >
-                {/* Photo with Overlay Badge */}
-                <div className="relative h-48 bg-surface-container overflow-hidden">
+                {/* Photo with Full Bottle View */}
+                <div className="relative h-64 sm:h-72 bg-gradient-to-b from-surface-container-low/50 to-surface-container-low/90 flex items-center justify-center p-4 overflow-hidden border-b border-outline-variant/15">
                   <img
                     src={product.imageUrl}
                     alt={product.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-300 drop-shadow-md"
                   />
                   {/* Stock Status Badge */}
                   <div className="absolute top-3 right-3">
@@ -452,11 +452,13 @@ export const InventoryView: React.FC<InventoryViewProps> = ({
                     <tr key={product.id} className="hover:bg-surface-container-low/50 transition-colors">
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-3">
-                          <img
-                            src={product.imageUrl}
-                            alt={product.name}
-                            className="w-10 h-10 rounded-lg object-cover bg-surface-container shrink-0"
-                          />
+                          <div className="w-12 h-14 rounded-lg bg-surface-container-low border border-outline-variant/20 flex items-center justify-center p-1 shrink-0">
+                            <img
+                              src={product.imageUrl}
+                              alt={product.name}
+                              className="max-h-full max-w-full object-contain drop-shadow-xs"
+                            />
+                          </div>
                           <div>
                             <div className="font-semibold text-on-surface">{product.name}</div>
                             <div className="text-xs text-on-surface-variant">{product.volumeOrSize || product.description}</div>

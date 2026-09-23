@@ -11,14 +11,7 @@ interface ProductFormModalProps {
   onSave: (product: Product) => void;
 }
 
-const PRESET_IMAGES = [
-  { label: 'Black Glass Flacon', url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD2sxZz3N9NBgwhzWyVKzzDpl8sF3tgMj8o1Maact6NP7Esi_UZyCniMH_ifB0gBEJAeuCEoUOxdJ4m0F0eyunB5CnIt5DEMFFZmyy-9MGh0un1VQVKXVtSQ4OGsG_tz6kyPDOaKVuAvT9G1J8TVJsu8GQYqVNtCSyeg8lzux5YXT-cIKZTMkFGyoYq_PjweKwp1groueddYCRfSokEehYNaUb-oUHIthjThOzB4TOHXRIewXWQ4r5mHg' },
-  { label: 'Amber / Rose Gold Flacon', url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBlNafNaQdaJz4B7E7fJn3SbRPtQkKQzsrbd1ldoP-xNlIP1icImv5lR8rY4A7SuL7c1myf0KabUw42RzSEZBblN6VsnZRT3FVIaQqZ85P9IFRnIPBe47Tx_Hu0kzUtjaCklLNCDenPBwoIj6hgP8r4jcqIqHsal-hyrGX2dy0tQ6L-dnEbwTn2erYBtlxm1ftRsJqnQgrpNCawEZSX1qXvUm19kYwEtHacFuXcaEF_vPh-Amg2wqGHjw' },
-  { label: 'Oud Noir Crystal Flacon', url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDX-QLWjVSPbLppxiAkXw5HBerfrmxsmB7TH87nm8rwnt0ibttQT76WibOfEy34EOTNO9CWstRGr6cYIUWy9WfdRyi11H8Kt8-r3fENL_b8AqoZWoOWzDv6d84ZsnwNeiOQfsxnvIhpK9af6BgyFDa9KxHzQCfjBaoWzTmqOLPHojRh8JPuB9uYb_ZY0kJ2Ei3ouEiOx4JtrIRX7L-5Jf-2-1skqMhvgFek7Y17rOd4BVCLCC0FS1j5ew' },
-  { label: 'Gold Shimmer Mist Bottle', url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuALk1fx2O9WvfR5wLaSdWxcZBM9EsoIL6RoY1VepSaxk0RCk49sA4KT3Zd35zbmTgf3Wsvic_Qa57b8rIRuMhHTGaat2ZXeOJ6kFDWrXNH4M3KWrE3Q9KxnqWnrIXExhcKcxtqYmR8B4fWIIrYSAfn2XgbdIjWT0qYcuxZiK4huBemvpE7AsmhRxBWpMaVJGTwGv8IG1wNdyTD3jpYf87ilOSWOhOpZEx91qJR942s-Qm9sNOVTomIU8w' },
-  { label: 'Lip Treatment Tin', url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAy1SnkBeYbffqN28tZS0YjEy-3dIgjAd0DnvjBeirrmLtunSR5DxOeIJmvB_iRReTbrh8DhNxU6VkzBSrrqg0WFFxaK9CoDaUDnsWQ5A_4KNrfXlPbC6PgQ86mlbbhyUaAJIXXSxGcKPaaSZBuDLUMPF_HO13LZl9Hv-wQgXmQ4XrbkRbUYXHcUidBMtc1bca4PmjkLZ-ENc5CLfOsbriZ7lb7slWhfk4EeOtPRDfWLycmu2CJOzmZLA' },
-  { label: 'Berry Shimmer Tube', url: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBAiNLpNcaDoct3407oDruTVWl0nZ_n4AInENYlEVoPy84l97kFtuCrQW7ov2NLUJrkPhuTWGRooN8W14VOXX7KNXAw3WdrXlYWCls66AuZHylPNAounNvASf8hW7B4_dW-M3v3gYJ7dua3t2BLzJLqH4SeWCZ3GuZWxcI1bdu4mx_xVpZUIrG91psst3Q0Xxiqqv59r-Ijz_mdMIXyxB5RWBTD6e4lQi0oUvF_kQHflsYPhSfXenVD2A' }
-];
+const DEFAULT_PERFUME_PLACEHOLDER = 'https://lh3.googleusercontent.com/aida-public/AB6AXuDX-QLWjVSPbLppxiAkXw5HBerfrmxsmB7TH87nm8rwnt0ibttQT76WibOfEy34EOTNO9CWstRGr6cYIUWy9WfdRyi11H8Kt8-r3fENL_b8AqoZWoOWzDv6d84ZsnwNeiOQfsxnvIhpK9af6BgyFDa9KxHzQCfjBaoWzTmqOLPHojRh8JPuB9uYb_ZY0kJ2Ei3ouEiOx4JtrIRX7L-5Jf-2-1skqMhvgFek7Y17rOd4BVCLCC0FS1j5ew';
 
 export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   isOpen,
@@ -29,21 +22,18 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const [name, setName] = useState('');
   const [category, setCategory] = useState('Perfumes');
   const [sku, setSku] = useState('');
-  const [stock, setStock] = useState(20);
-  const [minStockAlert, setMinStockAlert] = useState(10);
-  const [costPrice, setCostPrice] = useState(15000);
-  const [sellingPrice, setSellingPrice] = useState(35000);
-  const [volumeOrSize, setVolumeOrSize] = useState('50ml');
+  const [stock, setStock] = useState(1);
+  const [minStockAlert, setMinStockAlert] = useState(5);
+  const [costPrice, setCostPrice] = useState(0);
+  const [sellingPrice, setSellingPrice] = useState(0);
+  const [volumeOrSize, setVolumeOrSize] = useState('');
   const [description, setDescription] = useState('');
-  const [imageUrl, setImageUrl] = useState(PRESET_IMAGES[0].url);
+  const [imageUrl, setImageUrl] = useState('');
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
-  const [imageTab, setImageTab] = useState<'upload' | 'preset'>('upload');
-  const [isDragging, setIsDragging] = useState(false);
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (productToEdit) {
@@ -54,11 +44,10 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setMinStockAlert(productToEdit.minStockAlert);
       setCostPrice(productToEdit.costPrice);
       setSellingPrice(productToEdit.sellingPrice);
-      setVolumeOrSize(productToEdit.volumeOrSize || '50ml');
+      setVolumeOrSize(productToEdit.volumeOrSize || '');
       setDescription(productToEdit.description || '');
-      setImageUrl(productToEdit.imageUrl);
-      setUploadedFileName(productToEdit.imageUrl.startsWith('data:') ? 'Custom uploaded image' : null);
-      setImageTab(productToEdit.imageUrl.startsWith('data:') ? 'upload' : 'preset');
+      setImageUrl(productToEdit.imageUrl || '');
+      setUploadedFileName(null);
     } else {
       setName('');
       setCategory('Perfumes');
@@ -69,9 +58,8 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setSellingPrice(0);
       setVolumeOrSize('');
       setDescription('');
-      setImageUrl(PRESET_IMAGES[0].url);
+      setImageUrl('');
       setUploadedFileName(null);
-      setImageTab('upload');
     }
   }, [productToEdit, isOpen]);
 
@@ -96,7 +84,6 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       setImageUrl(optimized.dataUrl);
       const displayKb = Math.round(optimized.optimizedSize / 1024);
       setUploadedFileName(`${file.name || 'Photo'} (~${displayKb} KB)`);
-      setImageTab('upload');
     } catch (err: any) {
       console.error('Image upload failed:', err);
       setUploadError(err.message || 'Could not load this photo. Please try choosing another image.');
@@ -112,25 +99,6 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
     }
     // Reset value so selecting the same file again still fires change
     e.target.value = '';
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      handleImageFile(file);
-    }
   };
 
   const unitProfit = sellingPrice - costPrice;
@@ -154,7 +122,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
       sellingPrice: Number(sellingPrice) || 0,
       volumeOrSize: volumeOrSize.trim() || 'Standard',
       description: description.trim(),
-      imageUrl: imageUrl || PRESET_IMAGES[0].url
+      imageUrl: imageUrl || DEFAULT_PERFUME_PLACEHOLDER
     };
 
     onSave(finalProduct);
@@ -362,34 +330,13 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             </div>
           </div>
 
-          {/* Product Image: Upload from Phone / Camera / PC vs Preset library */}
+          {/* Product Image: Only Choose from Photos */}
           <div className="space-y-2 pt-2 border-t border-outline-variant/20">
             <div className="flex items-center justify-between">
               <label className="block text-xs font-semibold text-on-surface">
                 Product Photo
               </label>
-              <div className="flex items-center gap-1 bg-surface-container-low p-1 rounded-lg border border-outline-variant/20 text-xs">
-                <button
-                  type="button"
-                  onClick={() => setImageTab('upload')}
-                  className={`px-2.5 py-1 rounded-md font-medium transition-colors cursor-pointer flex items-center gap-1 ${
-                    imageTab === 'upload' ? 'bg-surface-container-lowest text-primary shadow-xs font-semibold' : 'text-on-surface-variant'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[1rem]">add_a_photo</span>
-                  <span>Camera &amp; Upload</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setImageTab('preset')}
-                  className={`px-2.5 py-1 rounded-md font-medium transition-colors cursor-pointer flex items-center gap-1 ${
-                    imageTab === 'preset' ? 'bg-surface-container-lowest text-primary shadow-xs font-semibold' : 'text-on-surface-variant'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-[1rem]">collections</span>
-                  <span>Presets</span>
-                </button>
-              </div>
+              <span className="text-[0.6875rem] text-on-surface-variant font-medium">Full bottle view</span>
             </div>
 
             {/* Error Message if any */}
@@ -400,143 +347,78 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
               </div>
             )}
 
-            {/* Upload / Camera Tab */}
-            {imageTab === 'upload' && (
-              <div className="space-y-3">
-                {/* Standard Photo Picker (Gallery / Files / PC) */}
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileInputChange}
-                  accept="image/*"
-                  className="hidden"
-                />
+            {/* Hidden File Picker: Works for phone photos & PC */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileInputChange}
+              accept="image/*"
+              className="hidden"
+            />
 
-                {/* Direct Camera Shutter on Phones */}
-                <input
-                  type="file"
-                  ref={cameraInputRef}
-                  onChange={handleFileInputChange}
-                  accept="image/*"
-                  capture="environment"
-                  className="hidden"
-                />
-
-                {/* Quick Action Buttons for Mobile Phone */}
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => cameraInputRef.current?.click()}
-                    disabled={isOptimizing}
-                    className="py-2.5 px-3 rounded-xl bg-primary/10 hover:bg-primary/15 text-primary border border-primary/20 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
-                  >
-                    <span className="material-symbols-outlined text-[1.25rem]">photo_camera</span>
-                    <span>Take Photo</span>
-                  </button>
-
+            {/* Loading / Optimizing state */}
+            {isOptimizing ? (
+              <div className="border border-dashed border-primary/50 rounded-2xl p-8 text-center bg-primary/5 flex flex-col items-center justify-center gap-2">
+                <span className="material-symbols-outlined animate-spin text-[2.25rem] text-primary">progress_activity</span>
+                <p className="text-xs font-semibold text-primary">Optimizing photo for fast display...</p>
+                <p className="text-[0.6875rem] text-on-surface-variant">Compressing fragrance photo</p>
+              </div>
+            ) : imageUrl ? (
+              /* Selected Image Card with FULL BOTTLE VIEW */
+              <div className="rounded-2xl border border-outline-variant/30 bg-surface-container-low/60 overflow-hidden flex flex-col">
+                <div className="w-full h-56 sm:h-64 flex items-center justify-center p-3 bg-surface-container-lowest">
+                  <img
+                    src={imageUrl}
+                    alt="Perfume bottle preview"
+                    className="max-h-full max-w-full object-contain drop-shadow-md"
+                  />
+                </div>
+                <div className="p-3 bg-surface-container-low flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-outline-variant/20">
+                  <div className="min-w-0 flex-1">
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800">
+                      <span className="material-symbols-outlined text-[1rem]">check_circle</span>
+                      Entire bottle visible
+                    </span>
+                    {uploadedFileName && (
+                      <p className="text-[0.6875rem] text-on-surface-variant truncate mt-0.5">{uploadedFileName}</p>
+                    )}
+                  </div>
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    disabled={isOptimizing}
-                    className="py-2.5 px-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface border border-outline-variant/30 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
+                    className="px-4 py-2 rounded-xl bg-primary hover:bg-primary-container text-on-primary text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer shadow-xs transition-colors shrink-0"
                   >
-                    <span className="material-symbols-outlined text-[1.25rem]">photo_library</span>
+                    <span className="material-symbols-outlined text-[1.125rem]">photo_library</span>
                     <span>Choose from Photos</span>
                   </button>
                 </div>
-
-                {/* Drag & Drop or Preview Card */}
-                {isOptimizing ? (
-                  <div className="border-2 border-dashed border-primary/50 rounded-xl p-6 text-center bg-primary/5 flex flex-col items-center justify-center gap-2">
-                    <span className="material-symbols-outlined animate-spin text-[2rem] text-primary">progress_activity</span>
-                    <p className="text-xs font-semibold text-primary">Optimizing photo for fast mobile display...</p>
-                    <p className="text-[0.6875rem] text-on-surface-variant">Compressing high-resolution camera photo</p>
-                  </div>
-                ) : (
-                  <div
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    onClick={() => fileInputRef.current?.click()}
-                    className={`border-2 border-dashed rounded-xl p-4 sm:p-5 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-2 ${
-                      isDragging
-                        ? 'border-primary bg-primary/5'
-                        : 'border-outline-variant/40 hover:border-primary/60 bg-surface-container-low/50 hover:bg-surface-container-low'
-                    }`}
-                  >
-                    {imageUrl && imageUrl !== PRESET_IMAGES[0].url ? (
-                      <div className="flex items-center gap-3 w-full">
-                        <img
-                          src={imageUrl}
-                          alt="Product preview"
-                          className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover bg-surface-container shadow-sm border border-outline-variant/30 shrink-0"
-                        />
-                        <div className="text-left flex-1 min-w-0">
-                          <div className="text-xs font-semibold text-on-surface truncate">
-                            {uploadedFileName || 'Photo loaded successfully'}
-                          </div>
-                          <p className="text-[0.6875rem] text-on-surface-variant mt-0.5">
-                            Tap either button above or click here to change photo.
-                          </p>
-                          <span className="inline-flex items-center gap-1 text-[0.6875rem] font-bold text-emerald-800 mt-1">
-                            <span className="material-symbols-outlined text-[0.875rem]">check_circle</span>
-                            Photo ready &amp; optimized
-                          </span>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            fileInputRef.current?.click();
-                          }}
-                          className="px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-xs font-medium text-on-surface border border-outline-variant/30 shrink-0"
-                        >
-                          Change
-                        </button>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                          <span className="material-symbols-outlined text-[1.5rem] sm:text-[1.75rem]">add_photo_alternate</span>
-                        </div>
-                        <div>
-                          <p className="text-xs font-semibold text-on-surface">
-                            Tap to browse photos or drag &amp; drop from PC
-                          </p>
-                          <p className="text-[0.6875rem] text-on-surface-variant mt-0.5">
-                            Supports camera photos, iPhone HEIC, JPG, PNG &amp; WEBP
-                          </p>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                )}
               </div>
-            )}
-
-            {/* Presets Tab */}
-            {imageTab === 'preset' && (
-              <div className="space-y-2">
-                <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-                  {PRESET_IMAGES.map((img, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => {
-                        setImageUrl(img.url);
-                        setUploadedFileName(null);
-                      }}
-                      className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all cursor-pointer ${
-                        imageUrl === img.url
-                          ? 'border-primary ring-2 ring-primary/40'
-                          : 'border-transparent opacity-70 hover:opacity-100'
-                      }`}
-                      title={img.label}
-                    >
-                      <img src={img.url} alt={img.label} className="w-full h-full object-cover" />
-                    </button>
-                  ))}
+            ) : (
+              /* Empty State: Direct Choose from Photos */
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-outline-variant/50 hover:border-primary/60 rounded-2xl p-6 sm:p-8 text-center bg-surface-container-low/40 hover:bg-surface-container-low transition-all cursor-pointer flex flex-col items-center justify-center gap-3"
+              >
+                <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                  <span className="material-symbols-outlined text-[2rem]">photo_library</span>
                 </div>
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-on-surface">Choose a photo of the perfume</p>
+                  <p className="text-xs text-on-surface-variant max-w-xs mx-auto">
+                    The entire bottle from cap to base will be displayed neatly.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    fileInputRef.current?.click();
+                  }}
+                  className="mt-1 px-5 py-2.5 rounded-xl bg-primary text-on-primary text-xs font-semibold shadow-xs inline-flex items-center gap-2 cursor-pointer hover:bg-primary-container transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[1.125rem]">photo_library</span>
+                  <span>Choose from Photos</span>
+                </button>
               </div>
             )}
           </div>

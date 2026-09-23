@@ -168,11 +168,13 @@ export const RecordSaleModal: React.FC<RecordSaleModalProps> = ({
           {/* Product Stock Card Preview */}
           {currentProduct && (
             <div className="p-3 rounded-xl bg-surface-container-low/70 border border-outline-variant/20 flex items-center gap-3">
-              <img 
-                src={currentProduct.imageUrl} 
-                alt={currentProduct.name} 
-                className="w-12 h-12 rounded-lg object-cover bg-surface-container shrink-0" 
-              />
+              <div className="w-12 h-14 rounded-lg bg-surface-container-lowest border border-outline-variant/20 flex items-center justify-center p-1 shrink-0">
+                <img 
+                  src={currentProduct.imageUrl} 
+                  alt={currentProduct.name} 
+                  className="max-h-full max-w-full object-contain" 
+                />
+              </div>
               <div className="flex-1 min-w-0">
                 <div className="font-semibold text-sm text-on-surface truncate">{currentProduct.name}</div>
                 <div className="text-xs text-on-surface-variant font-mono">

@@ -73,11 +73,13 @@ export const StockAdjustModal: React.FC<StockAdjustModalProps> = ({
         {/* Header */}
         <div className="px-6 py-4 bg-surface-container-low border-b border-outline-variant/20 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <img 
-              src={product.imageUrl} 
-              alt={product.name} 
-              className="w-10 h-10 rounded-lg object-cover bg-surface-container" 
-            />
+            <div className="w-12 h-14 rounded-lg bg-surface-container-lowest border border-outline-variant/20 flex items-center justify-center p-1 shrink-0">
+              <img 
+                src={product.imageUrl} 
+                alt={product.name} 
+                className="max-h-full max-w-full object-contain" 
+              />
+            </div>
             <div>
               <h2 className="font-title-md font-semibold text-on-surface line-clamp-1">{product.name}</h2>
               <p className="text-xs text-on-surface-variant">Current Stock: <strong className="text-on-surface">{product.stock} units</strong></p>

@@ -412,7 +412,9 @@ export const OverviewView: React.FC<OverviewViewProps> = ({
                   className="p-3 rounded-xl bg-surface-container-low flex items-center justify-between gap-3 border border-outline-variant/10"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <img src={p.imageUrl} alt={p.name} className="w-9 h-9 rounded-lg object-cover bg-surface-container shrink-0" />
+                    <div className="w-10 h-12 rounded-lg bg-surface-container-lowest border border-outline-variant/20 flex items-center justify-center p-0.5 shrink-0">
+                      <img src={p.imageUrl} alt={p.name} className="max-h-full max-w-full object-contain" />
+                    </div>
                     <div className="truncate">
                       <div className="font-semibold text-xs text-on-surface truncate">{p.name}</div>
                       <div className="text-[0.6875rem] text-amber-900 font-bold">
