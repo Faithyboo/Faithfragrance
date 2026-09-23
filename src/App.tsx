@@ -64,12 +64,25 @@ export const App: React.FC = () => {
     return INITIAL_SALES;
   });
 
-  // Save to LocalStorage
+  // Success Toast
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 3500);
+  };
+
+  // Save to LocalStorage with error safety
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products));
-    } catch (e) {
-      console.error(e);
+    } catch (e: any) {
+      console.error('Failed to save products:', e);
+      if (e?.name === 'QuotaExceededError' || e?.code === 22) {
+        showToast('Storage limit reached on this phone/browser. Images are automatically compressed to prevent this.');
+      }
     }
   }, [products]);
 
@@ -113,16 +126,6 @@ export const App: React.FC = () => {
 
   const [isRecordSaleOpen, setIsRecordSaleOpen] = useState(false);
   const [saleInitialProductId, setSaleInitialProductId] = useState<string | undefined>(undefined);
-
-  // Success Toast
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 3500);
-  };
 
   // Stock Adjustment Handler
   const handleConfirmStockAdjustment = (productId: string, delta: number, log: StockLog) => {

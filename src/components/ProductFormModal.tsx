@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Product } from '../types';
 import { INITIAL_CATEGORIES } from '../data/initialData';
 import { formatCFA, CURRENCY_LABEL } from '../utils/currency';
+import { optimizeImageFile } from '../utils/imageOptimizer';
 
 interface ProductFormModalProps {
   isOpen: boolean;
@@ -38,8 +39,11 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
   const [uploadedFileName, setUploadedFileName] = useState<string | null>(null);
   const [imageTab, setImageTab] = useState<'upload' | 'preset'>('upload');
   const [isDragging, setIsDragging] = useState(false);
+  const [isOptimizing, setIsOptimizing] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (productToEdit) {
@@ -82,27 +86,23 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
     }
   };
 
-  // Image file handler
-  const handleImageFile = (file: File) => {
-    if (!file.type.startsWith('image/')) {
-      alert('Please upload a valid image file (PNG, JPG, WEBP, etc.)');
-      return;
-    }
+  // Image file handler with auto-compression for phone camera & PC uploads
+  const handleImageFile = async (file: File) => {
+    setUploadError(null);
+    setIsOptimizing(true);
 
-    if (file.size > 8 * 1024 * 1024) {
-      alert('Image file size is too large. Please select an image under 8MB.');
-      return;
+    try {
+      const optimized = await optimizeImageFile(file, 1000, 0.82);
+      setImageUrl(optimized.dataUrl);
+      const displayKb = Math.round(optimized.optimizedSize / 1024);
+      setUploadedFileName(`${file.name || 'Photo'} (~${displayKb} KB)`);
+      setImageTab('upload');
+    } catch (err: any) {
+      console.error('Image upload failed:', err);
+      setUploadError(err.message || 'Could not load this photo. Please try choosing another image.');
+    } finally {
+      setIsOptimizing(false);
     }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        setImageUrl(e.target.result as string);
-        setUploadedFileName(file.name);
-        setImageTab('upload');
-      }
-    };
-    reader.readAsDataURL(file);
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -110,6 +110,8 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
     if (file) {
       handleImageFile(file);
     }
+    // Reset value so selecting the same file again still fires change
+    e.target.value = '';
   };
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -360,7 +362,7 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
             </div>
           </div>
 
-          {/* Product Image: Upload from PC vs Preset library */}
+          {/* Product Image: Upload from Phone / Camera / PC vs Preset library */}
           <div className="space-y-2 pt-2 border-t border-outline-variant/20">
             <div className="flex items-center justify-between">
               <label className="block text-xs font-semibold text-on-surface">
@@ -374,8 +376,8 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                     imageTab === 'upload' ? 'bg-surface-container-lowest text-primary shadow-xs font-semibold' : 'text-on-surface-variant'
                   }`}
                 >
-                  <span className="material-symbols-outlined text-[1rem]">upload_file</span>
-                  <span>Upload from PC</span>
+                  <span className="material-symbols-outlined text-[1rem]">add_a_photo</span>
+                  <span>Camera &amp; Upload</span>
                 </button>
                 <button
                   type="button"
@@ -385,85 +387,130 @@ export const ProductFormModal: React.FC<ProductFormModalProps> = ({
                   }`}
                 >
                   <span className="material-symbols-outlined text-[1rem]">collections</span>
-                  <span>Preset Library</span>
+                  <span>Presets</span>
                 </button>
               </div>
             </div>
 
-            {/* Upload from PC Tab */}
+            {/* Error Message if any */}
+            {uploadError && (
+              <div className="p-3 rounded-xl bg-error/10 border border-error/30 text-error text-xs flex items-center gap-2">
+                <span className="material-symbols-outlined text-[1.125rem] shrink-0">error</span>
+                <span>{uploadError}</span>
+              </div>
+            )}
+
+            {/* Upload / Camera Tab */}
             {imageTab === 'upload' && (
               <div className="space-y-3">
+                {/* Standard Photo Picker (Gallery / Files / PC) */}
                 <input
                   type="file"
                   ref={fileInputRef}
                   onChange={handleFileInputChange}
-                  accept="image/png, image/jpeg, image/webp, image/gif, image/svg+xml"
+                  accept="image/*"
                   className="hidden"
                 />
 
-                <div
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                  className={`border-2 border-dashed rounded-xl p-5 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-2 ${
-                    isDragging
-                      ? 'border-primary bg-primary/5'
-                      : 'border-outline-variant/40 hover:border-primary/60 bg-surface-container-low/50 hover:bg-surface-container-low'
-                  }`}
-                >
-                  {imageUrl ? (
-                    <div className="flex items-center gap-4 w-full">
-                      <img
-                        src={imageUrl}
-                        alt="Product preview"
-                        className="w-16 h-16 rounded-xl object-cover bg-surface-container shadow-sm border border-outline-variant/30 shrink-0"
-                      />
-                      <div className="text-left flex-1 min-w-0">
-                        <div className="text-xs font-semibold text-on-surface truncate">
-                          {uploadedFileName || 'Selected product image'}
-                        </div>
-                        <p className="text-[0.6875rem] text-on-surface-variant mt-0.5">
-                          Click or drag a new image here to replace it.
-                        </p>
-                        <span className="inline-flex items-center gap-1 text-[0.6875rem] font-bold text-primary mt-1">
-                          <span className="material-symbols-outlined text-[0.875rem]">check_circle</span>
-                          Ready to save
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          fileInputRef.current?.click();
-                        }}
-                        className="px-3 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-xs font-medium text-on-surface border border-outline-variant/30 shrink-0"
-                      >
-                        Browse PC
-                      </button>
-                    </div>
-                  ) : (
-                    <>
-                      <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                        <span className="material-symbols-outlined text-[1.75rem]">add_photo_alternate</span>
-                      </div>
-                      <div>
-                        <p className="text-xs font-semibold text-on-surface">
-                          Choose an image from your PC or drag &amp; drop
-                        </p>
-                        <p className="text-[0.6875rem] text-on-surface-variant mt-0.5">
-                          Supports PNG, JPG, WEBP, or GIF (max 8MB)
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        className="mt-1 px-4 py-1.5 rounded-xl bg-primary text-on-primary text-xs font-semibold shadow-xs"
-                      >
-                        Browse Files
-                      </button>
-                    </>
-                  )}
+                {/* Direct Camera Shutter on Phones */}
+                <input
+                  type="file"
+                  ref={cameraInputRef}
+                  onChange={handleFileInputChange}
+                  accept="image/*"
+                  capture="environment"
+                  className="hidden"
+                />
+
+                {/* Quick Action Buttons for Mobile Phone */}
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => cameraInputRef.current?.click()}
+                    disabled={isOptimizing}
+                    className="py-2.5 px-3 rounded-xl bg-primary/10 hover:bg-primary/15 text-primary border border-primary/20 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
+                  >
+                    <span className="material-symbols-outlined text-[1.25rem]">photo_camera</span>
+                    <span>Take Photo</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isOptimizing}
+                    className="py-2.5 px-3 rounded-xl bg-surface-container hover:bg-surface-container-high text-on-surface border border-outline-variant/30 text-xs font-semibold flex items-center justify-center gap-2 transition-colors cursor-pointer shadow-xs"
+                  >
+                    <span className="material-symbols-outlined text-[1.25rem]">photo_library</span>
+                    <span>Choose from Photos</span>
+                  </button>
                 </div>
+
+                {/* Drag & Drop or Preview Card */}
+                {isOptimizing ? (
+                  <div className="border-2 border-dashed border-primary/50 rounded-xl p-6 text-center bg-primary/5 flex flex-col items-center justify-center gap-2">
+                    <span className="material-symbols-outlined animate-spin text-[2rem] text-primary">progress_activity</span>
+                    <p className="text-xs font-semibold text-primary">Optimizing photo for fast mobile display...</p>
+                    <p className="text-[0.6875rem] text-on-surface-variant">Compressing high-resolution camera photo</p>
+                  </div>
+                ) : (
+                  <div
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                    onClick={() => fileInputRef.current?.click()}
+                    className={`border-2 border-dashed rounded-xl p-4 sm:p-5 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-2 ${
+                      isDragging
+                        ? 'border-primary bg-primary/5'
+                        : 'border-outline-variant/40 hover:border-primary/60 bg-surface-container-low/50 hover:bg-surface-container-low'
+                    }`}
+                  >
+                    {imageUrl && imageUrl !== PRESET_IMAGES[0].url ? (
+                      <div className="flex items-center gap-3 w-full">
+                        <img
+                          src={imageUrl}
+                          alt="Product preview"
+                          className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover bg-surface-container shadow-sm border border-outline-variant/30 shrink-0"
+                        />
+                        <div className="text-left flex-1 min-w-0">
+                          <div className="text-xs font-semibold text-on-surface truncate">
+                            {uploadedFileName || 'Photo loaded successfully'}
+                          </div>
+                          <p className="text-[0.6875rem] text-on-surface-variant mt-0.5">
+                            Tap either button above or click here to change photo.
+                          </p>
+                          <span className="inline-flex items-center gap-1 text-[0.6875rem] font-bold text-emerald-800 mt-1">
+                            <span className="material-symbols-outlined text-[0.875rem]">check_circle</span>
+                            Photo ready &amp; optimized
+                          </span>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            fileInputRef.current?.click();
+                          }}
+                          className="px-2.5 py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-xs font-medium text-on-surface border border-outline-variant/30 shrink-0"
+                        >
+                          Change
+                        </button>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                          <span className="material-symbols-outlined text-[1.5rem] sm:text-[1.75rem]">add_photo_alternate</span>
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-on-surface">
+                            Tap to browse photos or drag &amp; drop from PC
+                          </p>
+                          <p className="text-[0.6875rem] text-on-surface-variant mt-0.5">
+                            Supports camera photos, iPhone HEIC, JPG, PNG &amp; WEBP
+                          </p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
