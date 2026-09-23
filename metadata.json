@@ -1,0 +1,6 @@
+{
+  "name": "Faith Fragrance Enterprise Suite",
+  "description": "Executive luxury perfumery ERP & point of sale suite featuring inventory tracking, stock movements ledger, and catalog architecture.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
