@@ -239,6 +239,7 @@ export const App: React.FC = () => {
           setIsRecordSaleOpen(true);
         }}
         lowStockCount={lowStockCount}
+        totalProductsCount={products.length}
       />
 
       {/* Main Content Area */}
@@ -293,7 +294,7 @@ export const App: React.FC = () => {
       {/* Footer */}
       <footer className="mt-12 py-6 border-t border-outline-variant/20 text-center text-xs text-on-surface-variant">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p>© {new Date().getFullYear()} Faith Fragrance Boutique. All inventory and sales data stored locally.</p>
+          <p>© {new Date().getFullYear()} Faith Fragrance Management System. All inventory and sales data stored locally.</p>
           <div className="flex items-center gap-4">
             <span className="font-mono text-primary font-bold">{products.length} Products in Store</span>
             {products.length > 0 && (

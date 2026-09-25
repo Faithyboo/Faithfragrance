@@ -135,8 +135,8 @@ export const SalesRegisterView: React.FC<SalesRegisterViewProps> = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/40 backdrop-blur-xs p-4">
           <div className="bg-surface-container-lowest rounded-2xl shadow-2xl w-full max-w-sm border border-outline-variant/30 p-6 space-y-4">
             <div className="text-center space-y-1 border-b border-outline-variant/20 pb-4">
-              <h3 className="font-headline-md font-semibold text-on-surface text-lg">Faith Fragrance</h3>
-              <p className="text-xs text-on-surface-variant">Boutique &amp; Parfumerie • Sales Receipt</p>
+              <h3 className="font-headline-md font-semibold text-on-surface text-lg">Faith Fragrance Management System</h3>
+              <p className="text-xs text-on-surface-variant">Sales Receipt &amp; Voucher</p>
               <p className="text-[0.6875rem] text-on-surface-variant font-mono">{selectedReceipt.date}</p>
             </div>
 
