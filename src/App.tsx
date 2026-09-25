@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { Product, StockLog, SaleRecord } from './types';
-import { INITIAL_PRODUCTS, INITIAL_STOCK_LOGS, INITIAL_SALES } from './data/initialData';
+import { Product, StockLog, SaleRecord, Customer } from './types';
+import { INITIAL_PRODUCTS, INITIAL_STOCK_LOGS, INITIAL_SALES, INITIAL_CUSTOMERS } from './data/initialData';
 import { SimpleHeader, ActiveTab } from './components/SimpleHeader';
 import { InventoryView } from './components/InventoryView';
+import { CustomersView } from './components/CustomersView';
 import { SalesRegisterView } from './components/SalesRegisterView';
 import { StockHistoryView } from './components/StockHistoryView';
 import { OverviewView } from './components/OverviewView';
 import { StockAdjustModal } from './components/StockAdjustModal';
 import { ProductFormModal } from './components/ProductFormModal';
+import { CustomerFormModal } from './components/CustomerFormModal';
 import { RecordSaleModal } from './components/RecordSaleModal';
 import { formatCFA } from './utils/currency';
 
 const STORAGE_KEYS = {
   PRODUCTS: 'faith_fragrance_products_empty_v7',
   LOGS: 'faith_fragrance_logs_empty_v7',
-  SALES: 'faith_fragrance_sales_empty_v7'
+  SALES: 'faith_fragrance_sales_empty_v7',
+  CUSTOMERS: 'faith_fragrance_customers_v1'
 };
 
 // Purge legacy demo data caches so user gets a completely empty store
@@ -64,6 +67,16 @@ export const App: React.FC = () => {
     return INITIAL_SALES;
   });
 
+  const [customers, setCustomers] = useState<Customer[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.CUSTOMERS);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {
+      console.error(e);
+    }
+    return INITIAL_CUSTOMERS;
+  });
+
   // Success Toast
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -102,6 +115,14 @@ export const App: React.FC = () => {
     }
   }, [sales]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEYS.CUSTOMERS, JSON.stringify(customers));
+    } catch (e) {
+      console.error(e);
+    }
+  }, [customers]);
+
   // Active Tab
   const [activeTab, setActiveTab] = useState<ActiveTab>('inventory');
 
@@ -124,8 +145,18 @@ export const App: React.FC = () => {
     productToEdit: null
   });
 
+  const [customerForm, setCustomerForm] = useState<{
+    isOpen: boolean;
+    customerToEdit: Customer | null;
+  }>({
+    isOpen: false,
+    customerToEdit: null
+  });
+
   const [isRecordSaleOpen, setIsRecordSaleOpen] = useState(false);
   const [saleInitialProductId, setSaleInitialProductId] = useState<string | undefined>(undefined);
+  const [saleInitialCustomerId, setSaleInitialCustomerId] = useState<string | undefined>(undefined);
+  const [standaloneReceipt, setStandaloneReceipt] = useState<SaleRecord | null>(null);
 
   // Stock Adjustment Handler
   const handleConfirmStockAdjustment = (productId: string, delta: number, log: StockLog) => {
@@ -161,7 +192,8 @@ export const App: React.FC = () => {
       return p;
     }));
 
-    showToast(`Sale recorded successfully (${formatCFA(newSale.totalAmount)}). Stock updated.`);
+    const clientMsg = newSale.customerName ? ` for ${newSale.customerName}` : '';
+    showToast(`Sale recorded${clientMsg} (${formatCFA(newSale.totalAmount)}). Stock & customer ledger updated.`);
   };
 
   // Add or Edit Product Handler
@@ -218,9 +250,36 @@ export const App: React.FC = () => {
     }
   };
 
+  // Add or Edit Customer Handler
+  const handleSaveCustomer = (savedCustomer: Customer) => {
+    const existingIndex = customers.findIndex(c => c.id === savedCustomer.id);
+    if (existingIndex >= 0) {
+      setCustomers(prev => prev.map(c => c.id === savedCustomer.id ? savedCustomer : c));
+      showToast(`Updated profile for ${savedCustomer.fullName}.`);
+    } else {
+      setCustomers(prev => [savedCustomer, ...prev]);
+      showToast(`Registered new customer: ${savedCustomer.fullName} (${savedCustomer.id}).`);
+    }
+  };
+
+  // Delete Customer Handler
+  const handleDeleteCustomer = (customerId: string) => {
+    const target = customers.find(c => c.id === customerId);
+    setCustomers(prev => prev.filter(c => c.id !== customerId));
+    showToast(`Removed ${target?.fullName || 'customer'} from database.`);
+  };
+
   // Open Sale modal pre-selected for specific product
   const handleQuickSaleForProduct = (product: Product) => {
     setSaleInitialProductId(product.id);
+    setSaleInitialCustomerId(undefined);
+    setIsRecordSaleOpen(true);
+  };
+
+  // Open Sale modal pre-selected for specific customer
+  const handleRecordSaleForCustomer = (customer: Customer) => {
+    setSaleInitialCustomerId(customer.id);
+    setSaleInitialProductId(undefined);
     setIsRecordSaleOpen(true);
   };
 
@@ -236,10 +295,12 @@ export const App: React.FC = () => {
         onOpenAddProduct={() => setProductForm({ isOpen: true, productToEdit: null })}
         onOpenRecordSale={() => {
           setSaleInitialProductId(undefined);
+          setSaleInitialCustomerId(undefined);
           setIsRecordSaleOpen(true);
         }}
         lowStockCount={lowStockCount}
         totalProductsCount={products.length}
+        totalCustomersCount={customers.length}
       />
 
       {/* Main Content Area */}
@@ -255,12 +316,25 @@ export const App: React.FC = () => {
           />
         )}
 
+        {activeTab === 'customers' && (
+          <CustomersView
+            customers={customers}
+            sales={sales}
+            onOpenAddCustomer={() => setCustomerForm({ isOpen: true, customerToEdit: null })}
+            onEditCustomer={(customer) => setCustomerForm({ isOpen: true, customerToEdit: customer })}
+            onDeleteCustomer={handleDeleteCustomer}
+            onRecordSaleForCustomer={handleRecordSaleForCustomer}
+            onViewReceipt={(sale) => setStandaloneReceipt(sale)}
+          />
+        )}
+
         {activeTab === 'sales' && (
           <SalesRegisterView
             sales={sales}
             products={products}
             onOpenRecordSale={() => {
               setSaleInitialProductId(undefined);
+              setSaleInitialCustomerId(undefined);
               setIsRecordSaleOpen(true);
             }}
           />
@@ -294,26 +368,29 @@ export const App: React.FC = () => {
       {/* Footer */}
       <footer className="mt-12 py-6 border-t border-outline-variant/20 text-center text-xs text-on-surface-variant">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p>© {new Date().getFullYear()} Faith Fragrance Management System. All inventory and sales data stored locally.</p>
+          <p>© {new Date().getFullYear()} Faith Fragrance Management System. All inventory and customer data stored locally.</p>
           <div className="flex items-center gap-4">
-            <span className="font-mono text-primary font-bold">{products.length} Products in Store</span>
-            {products.length > 0 && (
+            <span className="font-mono text-primary font-bold">{products.length} Products</span>
+            <span className="font-mono text-secondary font-bold">{customers.length} Clients</span>
+            {(products.length > 0 || customers.length > 0 || sales.length > 0) && (
               <button
                 type="button"
                 onClick={() => {
-                  if (window.confirm('Are you sure you want to clear all products and reset the store to empty? This cannot be undone.')) {
+                  if (window.confirm('Reset the store to empty? This will clear all products, customer records, and sales history.')) {
                     setProducts([]);
                     setLogs([]);
                     setSales([]);
+                    setCustomers([]);
                     localStorage.removeItem(STORAGE_KEYS.PRODUCTS);
                     localStorage.removeItem(STORAGE_KEYS.LOGS);
                     localStorage.removeItem(STORAGE_KEYS.SALES);
-                    showToast('Store reset to completely empty.');
+                    localStorage.removeItem(STORAGE_KEYS.CUSTOMERS);
+                    showToast('Store & customer database reset to completely empty.');
                   }
                 }}
                 className="text-error hover:underline cursor-pointer text-[0.6875rem]"
               >
-                Clear / Empty Store
+                Clear Database
               </button>
             )}
           </div>
@@ -336,17 +413,94 @@ export const App: React.FC = () => {
         onSave={handleSaveProduct}
       />
 
+      <CustomerFormModal
+        isOpen={customerForm.isOpen}
+        customerToEdit={customerForm.customerToEdit}
+        existingCount={customers.length}
+        onClose={() => setCustomerForm({ isOpen: false, customerToEdit: null })}
+        onSave={handleSaveCustomer}
+      />
+
       <RecordSaleModal
         isOpen={isRecordSaleOpen}
         products={products}
+        customers={customers}
         selectedProductId={saleInitialProductId}
+        initialCustomerId={saleInitialCustomerId}
         onClose={() => {
           setIsRecordSaleOpen(false);
           setSaleInitialProductId(undefined);
+          setSaleInitialCustomerId(undefined);
         }}
         onCompleteSale={handleCompleteSale}
         onOpenAddNewProduct={() => setProductForm({ isOpen: true, productToEdit: null })}
+        onOpenAddCustomer={() => setCustomerForm({ isOpen: true, customerToEdit: null })}
       />
+
+      {/* Standalone Receipt Modal from Customer Orders */}
+      {standaloneReceipt && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/40 backdrop-blur-xs p-4">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-2xl w-full max-w-sm border border-outline-variant/30 p-6 space-y-4">
+            <div className="text-center space-y-1 border-b border-outline-variant/20 pb-4">
+              <h3 className="font-headline-md font-bold text-on-surface text-lg">Faith Fragrance Management System</h3>
+              <p className="text-xs text-on-surface-variant">Sales Receipt &amp; Voucher</p>
+              <div className="pt-1 flex items-center justify-center gap-2 text-[0.6875rem] font-mono text-on-surface-variant">
+                <span className="font-bold text-primary">
+                  {standaloneReceipt.receiptNumber || `REC-${standaloneReceipt.id.replace('sale-', '').slice(-6)}`}
+                </span>
+                <span>•</span>
+                <span>{standaloneReceipt.date}</span>
+              </div>
+              {standaloneReceipt.customerName && (
+                <div className="pt-1 text-xs font-semibold text-primary">
+                  Customer: {standaloneReceipt.customerName}
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2 text-xs">
+              {standaloneReceipt.items.map((it, idx) => (
+                <div key={idx} className="flex justify-between py-0.5 border-b border-outline-variant/5">
+                  <div>
+                    <span className="font-semibold">{it.quantity}x {it.productName}</span>
+                    <span className="text-[0.6875rem] text-on-surface-variant block">@{formatCFA(it.price)} each</span>
+                  </div>
+                  <span className="font-mono font-bold">{formatCFA(it.quantity * it.price)}</span>
+                </div>
+              ))}
+            </div>
+
+            {standaloneReceipt.discount && standaloneReceipt.discount > 0 && (
+              <div className="flex justify-between text-xs text-amber-900 pt-1">
+                <span>Discount:</span>
+                <span className="font-mono font-bold">-{formatCFA(standaloneReceipt.discount)}</span>
+              </div>
+            )}
+
+            <div className="border-t border-outline-variant/20 pt-3 flex justify-between items-baseline">
+              <span className="font-bold text-sm">Total Paid ({standaloneReceipt.paymentMethod}):</span>
+              <span className="font-mono font-bold text-xl text-primary">{formatCFA(standaloneReceipt.totalAmount)}</span>
+            </div>
+
+            <div className="pt-2 flex justify-between gap-2">
+              <button
+                type="button"
+                onClick={() => window.print()}
+                className="flex-1 py-2 rounded-xl bg-surface-container-low text-xs font-semibold hover:bg-surface-container cursor-pointer transition-colors"
+              >
+                Print Receipt
+              </button>
+              <button
+                type="button"
+                onClick={() => setStandaloneReceipt(null)}
+                className="flex-1 py-2 rounded-xl bg-primary text-on-primary text-xs font-semibold hover:bg-primary-container cursor-pointer transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

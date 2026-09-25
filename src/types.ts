@@ -30,14 +30,40 @@ export interface SaleItem {
   productId: string;
   productName: string;
   quantity: number;
-  price: number;
+  price: number; // unit price
+  category?: string;
+  discount?: number;
 }
+
+export type OrderStatus = 'Completed' | 'Pending' | 'Delivered' | 'Cancelled';
 
 export interface SaleRecord {
   id: string;
+  receiptNumber?: string;
   date: string;
   timestamp?: number;
   items: SaleItem[];
   totalAmount: number;
   paymentMethod: string;
+  customerId?: string;
+  customerName?: string;
+  discount?: number;
+  status?: OrderStatus;
+  notes?: string;
+}
+
+export type CustomerStatus = 'Active' | 'Inactive';
+export type PreferredContactMethod = 'WhatsApp' | 'Phone Call' | 'SMS' | 'Email';
+
+export interface Customer {
+  id: string; // Customer ID e.g. "CUST-1001"
+  fullName: string;
+  phoneNumber: string;
+  whatsappNumber: string;
+  email: string;
+  address: string;
+  dateRegistered: string;
+  status: CustomerStatus;
+  notes: string;
+  preferredContactMethod: PreferredContactMethod;
 }

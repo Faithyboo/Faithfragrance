@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-export type ActiveTab = 'inventory' | 'sales' | 'history' | 'overview';
+export type ActiveTab = 'inventory' | 'customers' | 'sales' | 'history' | 'overview';
 
 interface SimpleHeaderProps {
   activeTab: ActiveTab;
@@ -9,6 +9,7 @@ interface SimpleHeaderProps {
   onOpenRecordSale: () => void;
   lowStockCount: number;
   totalProductsCount?: number;
+  totalCustomersCount?: number;
 }
 
 export const SimpleHeader: React.FC<SimpleHeaderProps> = ({
@@ -17,7 +18,8 @@ export const SimpleHeader: React.FC<SimpleHeaderProps> = ({
   onOpenAddProduct,
   onOpenRecordSale,
   lowStockCount,
-  totalProductsCount = 0
+  totalProductsCount = 0,
+  totalCustomersCount = 0
 }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -94,6 +96,24 @@ export const SimpleHeader: React.FC<SimpleHeaderProps> = ({
                 {lowStockCount > 0 && (
                   <span className="px-1.5 py-0.2 rounded-full text-[0.625rem] font-bold bg-amber-100 text-amber-900">
                     {lowStockCount} low
+                  </span>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleNavClick('customers')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-body-md text-[0.875rem] font-medium transition-all cursor-pointer ${
+                  activeTab === 'customers'
+                    ? 'bg-surface-container-lowest text-on-surface font-semibold shadow-xs'
+                    : 'text-on-surface-variant hover:text-on-surface'
+                }`}
+              >
+                <span className="material-symbols-outlined text-[1.125rem] text-primary">group</span>
+                <span>Customers</span>
+                {totalCustomersCount > 0 && (
+                  <span className="px-1.5 py-0.2 rounded-full text-[0.625rem] font-bold bg-surface-container-high text-on-surface">
+                    {totalCustomersCount}
                   </span>
                 )}
               </button>
@@ -324,6 +344,35 @@ export const SimpleHeader: React.FC<SimpleHeaderProps> = ({
                 <span className="material-symbols-outlined text-on-surface-variant text-[1.25rem]">chevron_right</span>
               </button>
 
+              {/* Customer Database */}
+              <button
+                type="button"
+                onClick={() => handleNavClick('customers')}
+                className={`w-full flex items-center gap-3.5 p-3.5 rounded-2xl transition-all cursor-pointer text-left ${
+                  activeTab === 'customers'
+                    ? 'bg-primary/10 border-2 border-primary text-on-surface font-semibold shadow-xs'
+                    : 'bg-surface-container-low hover:bg-surface-container text-on-surface border border-transparent'
+                }`}
+              >
+                <div className={`p-2.5 rounded-xl ${activeTab === 'customers' ? 'bg-primary text-on-primary' : 'bg-surface-container-highest text-primary'}`}>
+                  <span className="material-symbols-outlined text-[1.375rem] block">group</span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-sm">Customer Database</span>
+                    {totalCustomersCount > 0 && (
+                      <span className="px-2 py-0.5 rounded-full text-[0.625rem] font-bold bg-surface-container-high text-on-surface">
+                        {totalCustomersCount}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-on-surface-variant truncate mt-0.5">
+                    Profiles, order histories &amp; WhatsApp
+                  </p>
+                </div>
+                <span className="material-symbols-outlined text-on-surface-variant text-[1.25rem]">chevron_right</span>
+              </button>
+
               {/* Sales Register */}
               <button
                 type="button"
@@ -399,6 +448,10 @@ export const SimpleHeader: React.FC<SimpleHeaderProps> = ({
               <span className="font-mono text-primary font-bold">{totalProductsCount} Products</span>
             </div>
             <div className="flex items-center justify-between text-xs pt-1 border-t border-outline-variant/20">
+              <span>Registered Clients</span>
+              <span className="font-mono font-semibold text-on-surface">{totalCustomersCount} Customers</span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
               <span>Currency</span>
               <span className="font-semibold text-on-surface">FCFA (XAF)</span>
             </div>
